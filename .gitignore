@@ -1,0 +1,16 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Rdata
+.httr-oauth
+.DS_Store
+.quarto
+# Ignore specific files
+00_Raw_Data/North10S090W_20101117_gmted_med150.tif
+00_Raw_Data/Peru_2000_2022.csv
+00_Raw_Data/SouthMedian30S090W_20101117_gmted_med150.tif
+00_Raw_Data/HydroRIVERS_v10_sa_shp/HydroRIVERS_v10_sa.dbf
+00_Raw_Data/HydroRIVERS_v10_sa_shp/HydroRIVERS_v10_sa.shp
+00_Raw_Data/SouthMedian30S090W_20101117_gmted_med075.tif
+00_Raw_Data/SouthMean30S090W_20101117_gmted_mea075.tif
