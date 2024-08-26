@@ -1,5 +1,4 @@
 # -Lima-Peru-Dengue-2019-2022
-# Lima-Peru-Dengue-2019-2022
 Spatial and Temporal Patterns of Dengue Incidence in Lima, Peru 2019-2022.
 
 ## Description
