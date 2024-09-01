@@ -207,8 +207,7 @@ plot(Pop_Den20)
 # change CRS of target raster (elevation) to match template extent (the "ext" object)
 
 Pop19_districts <- project(Pop_Den19, raster_area)
-Pop20_districts <- project(Pop_Den20, raster_area)
-
+Pop20_districts <- terra::project(Pop_Den20, raster_area)
 
 # crop matches extent of target raster "elevation_districs" to the "raster_area" template
 Pop19_Crop <- crop(Pop19_districts, raster_area)
@@ -236,9 +235,21 @@ Pop20_res <- terra::resample(Pop20_Mask, raster_area, method= 'bilinear')
 tm_shape(Pop19_res) +
   tm_raster() +
   tm_layout(legend.outside = TRUE)
-tm_shape(Pop20_res) +
-  tm_raster() +
-  tm_layout(legend.outside = TRUE)
+
+tm_shape(Pop20_res_masked) +
+  tm_raster(title = "People/km²", palette = "-RdYlGn") +
+  tm_shape(Lima_Districts) +  # Add this line to include your shapefile
+  tm_borders(col = "black") +
+  tm_scale_bar(position = c("left", "bottom")) +  # Add a scale bar
+  tm_compass(type = "8star", position = c("RIGHT", "TOP")) +
+  tm_layout(
+    legend.position = c("right", "top"), 
+    legend.outside = TRUE, 
+    frame = FALSE,  # Remove the box around the map
+    main.title = "Lima Population Density",  # Add your title here
+    main.title.position = "center",  # Optional: Center the title
+    main.title.size = 1.2 # Optional: Center the title
+  )
 # Check the metadata
 Pop19_res
 Pop20_res

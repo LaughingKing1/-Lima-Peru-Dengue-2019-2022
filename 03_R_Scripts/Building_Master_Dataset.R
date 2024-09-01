@@ -48,6 +48,8 @@ incidence_by_month_year_district <- incidence %>%
 # View the summarized data
 print(incidence_by_month_year_district)
 
+sum(incidence_by_month_year_district$IncidenceCount)
+
 ################################################################################################
 
 #Show incidence in each district in each year
@@ -59,6 +61,7 @@ incidence_by_year_district <- incidence %>%
 # View the summarized data
 print(incidence_by_year_district)
 
+sum(incidence_by_year_district$IncidenceCount)
 # Incidence by district
 incidence_district <- incidence %>%
   group_by(District) %>%  # Group by District and Year
@@ -84,7 +87,7 @@ all_districts <- data.frame(
 
 district_incidence <- rbind(incidence_district, all_districts)
 
-
+sum(district_incidence$IncidenceCount)
 #Show incidence in each district in each month each year
 sex_by_month_year_district <- incidence %>%
   mutate(Date = ymd(Date)) %>% # Convert Date to standard date format assuming year-month-day
@@ -105,6 +108,7 @@ incidence_by_month_year <- incidence %>%
   group_by(Year, Month) %>%  # Group by District, Year, and Month
   summarise(IncidenceCount = n()) # Count incidences per group
 
+sum(incidence_by_month_year$IncidenceCount)
 # View the summarized data
 print(incidence_by_year_district)
 
@@ -114,6 +118,7 @@ incidence_year <- incidence %>%
   group_by(Year) %>%  # Group by District and Year
   summarise(IncidenceCount = n()) # Count incidences per group
 
+sum(incidence_year$IncidenceCount)
 # View the summarized data
 print(incidence_year)
 
@@ -123,6 +128,7 @@ incidence_month <- incidence %>%
   group_by(Month) %>%  # Group by District and Year
   summarise(IncidenceCount = n()) # Count incidences per group
 
+sum(incidence_month$IncidenceCount)
 # View the summarized data
 print(incidence_month)
 
@@ -191,6 +197,8 @@ print(age_group_counts)
 
 # Check diagnosis type
 fever_counts <- table(incidence$Disease)
+
+print(fever_counts)
 
 ##############################################################################################################################################################################################################
 # Start to build master dataset
@@ -364,7 +372,7 @@ ggplot() +
        fill = "Elevation Value")
 # Plot for median data
 ggplot() +
-  geom_sf(data = shps_districts_reduced, aes(fill = SouthMedian30S090W_20101117_gmted_med075.1)) +
+  geom_sf(data = shps_districts_reduced, aes(fill = SouthMedian30S090W_20101117_gmted_med075)) +
   scale_fill_gradient(low = "blue", high = "green") +
   theme_minimal() +
   labs(title = "Median Elevation by District",
@@ -372,10 +380,10 @@ ggplot() +
 
 # I'm going with the median data as it appears to be less affeced by outlier data for elevation than the mean
 shps_districts_reduced <- shps_districts_reduced %>%
-  dplyr::select(-c(SouthMedian30S090W_20101117_gmted_med075, ID, ID.1))
+  dplyr::select(-c(ID))
 # Rename the median elevation row
 names(shps_districts_reduced)[which(names(shps_districts_reduced) == 
-                                      "SouthMedian30S090W_20101117_gmted_med075.1")] <- 
+                                      "SouthMedian30S090W_20101117_gmted_med075")] <- 
   "Elevation"
 
 merged_data <- left_join(merged_data, shps_districts_reduced, by = c("District", "geometry"))
@@ -442,7 +450,7 @@ names(merged_data)[which(names(merged_data) ==
 # Write a copy of the new master data sheet
 setwd("~/LSHTM_23/Thesis/Lima_Dengue/01_Messy_Data")
 #Write a copy of my master
-st_write(merged_data, "draft2master.geojson")
+st_write(merged_data, "draft2master.geojson", append = TRUE)
 ##############################################################################################################################################################################################################
 # Start on Vegitation Data
 
@@ -920,11 +928,10 @@ merged_data <- left_join(merged_data, all_veg, by = c("District", "Year", "Month
 setwd("~/LSHTM_23/Thesis/Lima_Dengue/02_Cleaned_Data")
 
 st_write(merged_data, "masterdengue.geojson")
-
 #Fix the vegetation NA's
 
 # bring in master data set
-master <- st_read("02_Cleaned_Data/masterdengue.geojson")
+master <- st_read("masterdengue.geojson")
 
 #Fix December NA's in Master
 master <- master %>%

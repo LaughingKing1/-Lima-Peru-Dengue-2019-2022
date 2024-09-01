@@ -207,7 +207,8 @@ district_pop <- data.frame(Messy_Demographics$District, Messy_Demographics$Pop_O
 write.csv(district_pop, "PopulationDistricts.csv")
 
 # Incidence, Filter by province and Year
-Messy_incidence <- filter(raw_incidence, Province == "LIMA", Year == 2019:2022)
+Messy_incidence <- raw_incidence %>%
+  filter(Province == "LIMA" & Year >= 2019 & Year <= 2022)
 
 ###############################################################################################################
 #Check for duplicates
@@ -239,7 +240,7 @@ Messy_incidence %>% distinct(Age_Type) #Check if there are any under 1's
 Messy_incidence$Age_Type
 
 # Remove from Incidence
-Messy_incidence <- Messy_incidence  %>% select(-c(Local_Code, Local_ID, Diresa, Ubigeo))
+Messy_incidence <- Messy_incidence  %>% dplyr::select(-c(Local_Code, Local_ID, Diresa, Ubigeo))
 
 # Remove from Demographics
 Messy_Demographics <- Messy_Demographics %>% dplyr::select(-c(
@@ -361,9 +362,11 @@ santaanita_data <- santaanita_data %>%
 
 #Change all children under 1 year old to 1 (there are only 3) by using the month symbol "M" in Age Type to mutate them 
 Messy_incidence <- mutate(Messy_incidence, Age = ifelse(Age_Type == "M", 1, Age))
+Messy_incidence <- mutate(Messy_incidence, Age = ifelse(Age_Type == "D", 1, Age))
+
 
 #Remove age_type column from messy incidence
-Messy_incidence <- Messy_incidence  %>% select(-c(Age_Type))
+Messy_incidence <- Messy_incidence  %>% dplyr::select(-c(Age_Type))
 
 #Set Epi week for each year in my data set, had to break down each year seperatly by filtering for the desired year then choosing the last day of the first week of each epidemiological calendar year
 #For 2019
@@ -389,7 +392,7 @@ Incidence_List <- list(Messy_incidence_19, Messy_incidence_20, Messy_incidence_2
 Merged_Messy_incidence <- Reduce(function(x, y) merge(x, y, all=TRUE), Incidence_List)
 
 #Remove the year and week column
-Merged_Messy_incidence <- Merged_Messy_incidence %>% select(-c(Year, Week, Diagnosis))
+Merged_Messy_incidence <- Merged_Messy_incidence %>% dplyr::select(-c(Year, Week, Diagnosis))
 # Set the Date column as a date type of data
 Merged_Messy_incidence$Date <- as.Date(Merged_Messy_incidence$Date, 
                                        format = "%Y-%m-%d", tz = "GMT-5")
@@ -400,9 +403,11 @@ Merged_Messy_incidence <- Merged_Messy_incidence %>%
   mutate(Disease = case_when(
     Disease == "DENGUE SIN SEÑALES DE ALARMA" ~ "0",
     Disease == "DENGUE CON SEÑALES DE ALARMA" ~ "1",
+    Disease == "DENGUE GRAVE" ~ "2",
     TRUE ~ Disease
   ))%>%
   mutate_at(c("Disease"), as.numeric)
+
 
 #Create binary variables for sex 1 = Male, 2 = Female
 Merged_Messy_incidence <- Merged_Messy_incidence %>%
@@ -412,8 +417,6 @@ Merged_Messy_incidence <- Merged_Messy_incidence %>%
     TRUE ~ Sex
   )) %>%
   mutate_at(c("Sex"), as.numeric)
-
-str(Merged_Messy_incidence)
 
 setwd("~/LSHTM_23/Thesis/Lima_Dengue/01_Messy_Data")
 #Save Cleaned Data
