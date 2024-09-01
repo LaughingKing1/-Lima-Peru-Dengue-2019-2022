@@ -159,9 +159,9 @@ month_incidence <- master %>%
   summarise(total_incidence = sum(IncidenceCount, na.rm = TRUE))
   
 ######################################################################################################## 
-# Start visualinzing weather data
+# Start visualinzing weather and relevant socioeconomic data
 
-# Aggregate for climate factors
+# Aggregate for climate and socio factors
 #Vegitation
 veg <- master %>%
   group_by(Year, Month) %>%
@@ -245,6 +245,8 @@ sum(month_incidence$total_incidence)
 # Convert Month to a factor with levels ordered by calendar month
 Temperature$Month <- factor(avg_temp_by_month$Month, levels = 1:12, labels = month.abb)
 
+
+#Graphing weather data
 # Graph Rain trends
 ggplot(rain, aes(x = Month, y = rain, group = Year)) +
   geom_line(aes(color = factor(Year))) +
@@ -306,8 +308,9 @@ ggplot(wind_direction, aes(x = Month, y = Avg_Wind_Dir, group = Year)) +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 
-# No Hygiene Map
+#Start mapping socio distribution across lima
 
+# No Hygiene Map
 # Create the plot for the current year
 ggplot() +
     geom_sf(data = master, aes(fill = Pop_No_Hygeine)) + 
