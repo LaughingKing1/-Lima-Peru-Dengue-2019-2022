@@ -32,8 +32,12 @@ vonhumboldt_monthly <- read.csv("01_Messy_Data/von_humboldt_mothly.csv")
 carbayllo_monthly$Precipitation_.mm.h.[carbayllo_monthly$Precipitation_.mm.h. == 0] <- NA
 sanjuan_monthly$Precipitation_.mm.h.[sanjuan_monthly$Precipitation_.mm.h. == 0] <- NA
 
+##########################################################################################################
+# 12/20/2024 USED THE FOLLOWING FOR MY THESIS BUT NOW I HAVE DATA FROM 2023 SO CAN KEEP THESE IN
 
-# Filter out 2023
+# sKIP THIS STEP NOW
+
+#Filter out 2023
 
 antonio_monthly <- antonio_monthly %>%
   filter(year %in% 2019:2022)
@@ -57,6 +61,21 @@ vonhumboldt_monthly <- vonhumboldt_monthly %>%
   filter(year %in% 2019:2022)
 ###################################################################################
 #Replace outlier data with NA's
+
+#Adding NANA data as there was an outlier for 3/23 in the data
+# NANA Data 
+# use the IQR method to identify outliers in the data and confirmed with visual inspection 
+Q1 <- quantile(nana_monthly$Precipitation_.mm.h., 0.25, na.rm = TRUE)
+Q3 <- quantile(nana_monthly$Precipitation_.mm.h., 0.75, na.rm = TRUE)
+IQR <- Q3 - Q1
+# I want to include more data than less so set SD to 3
+lower_bound <- Q1 - 3 * IQR
+upper_bound <- Q3 + 3 * IQR
+
+outliers <- nana_monthly$Precipitation_.mm.h. < lower_bound | nana_monthly$Precipitation_.mm.h. > upper_bound
+print(outliers)
+# Replace outliers with a NA
+nana_monthly$Precipitation_.mm.h.[outliers] <- NA
 
 # San Borja Data 
 # use the IQR method to identify outliers in the data and confirmed with visual inspection 
@@ -168,7 +187,7 @@ colnames(vonhumboldt_monthly) <- c("ID", "Year", "Month", "Precipitation", "Temp
 #########################################################################################################
 # Add the average values to replace the missing data (NA's) 
 # First add an ID column to my average data frame
-average_df$ID <- seq.int(1,48)
+average_df$ID <- seq.int(1,60)
 #Specify the columns that have NA values and need to be updated
 columns_to_update <- c("Precipitation", "Temperature",
                        "Wind_Speed", "Wind_Direction_Degrees", "Relative_Humidity")
@@ -369,15 +388,15 @@ villamaria_monthly <- villamaria_monthly %>%
 vonhumboldt_monthly <- vonhumboldt_monthly %>%
   select(-Date)
 #Unique codes in sequence of 48
-campo_monthly$ID <- seq.int(49,96)
-carbayllo_monthly$ID <- seq.int(97,144)
-nana_monthly$ID <- seq.int(145,192)
-sanborja_monthly$ID <- seq.int(193,240)
-sanjuan_monthly$ID <- seq.int(241,288)
-sanmartin_monthly$ID <- seq.int(289,336)
-santaanita_monthly$ID <- seq.int(337,384)
-villamaria_monthly$ID <- seq.int(385, 432)
-vonhumboldt_monthly$ID <- seq.int(433,480)
+campo_monthly$ID <- seq.int(61,120)
+carbayllo_monthly$ID <- seq.int(121,180)
+nana_monthly$ID <- seq.int(181,240)
+sanborja_monthly$ID <- seq.int(241,300)
+sanjuan_monthly$ID <- seq.int(301,360)
+sanmartin_monthly$ID <- seq.int(361,420)
+santaanita_monthly$ID <- seq.int(421,480)
+villamaria_monthly$ID <- seq.int(481, 540)
+vonhumboldt_monthly$ID <- seq.int(541,600)
 
 ##########################################################################################
 
@@ -431,16 +450,16 @@ vonhumboldt_monthly$Month <- month.name[vonhumboldt_monthly$Month]
 #Write cleaned data .csv
 setwd("~/LSHTM_23/Thesis/Lima_Dengue/02_Cleaned_Data")
 # Save as disctrict name instead of weather station name
-write.csv(antonio_monthly, "ancon_climate_clean.csv", row.names = FALSE)
-write.csv(campo_monthly, "JesusMaria_climate_clean.csv", row.names = FALSE)
-write.csv(carbayllo_monthly, "Carabayllo_climate_clean.csv", row.names = FALSE)
-write.csv(nana_monthly, "Lurigancho_Chosica_climate_clean.csv", row.names = FALSE)
-write.csv(sanborja_monthly, "SanBorja_climate_clean.csv", row.names = FALSE)
-write.csv(sanjuan_monthly, "SanJuandeLurigancho_climate_clean.csv", row.names = FALSE)
-write.csv(sanmartin_monthly, "SanMartinDePorres_climate_clean.csv", row.names = FALSE)
-write.csv(santaanita_monthly, "SantaAnita_climate_clean.csv", row.names = FALSE)
-write.csv(villamaria_monthly, "VillaMariaDelTriunfo_climate_clean.csv", row.names = FALSE)
-write.csv(vonhumboldt_monthly, "LaMolina_climate_clean.csv", row.names = FALSE)
+write.csv(antonio_monthly, "ancon_climate_clean23.csv", row.names = FALSE)
+write.csv(campo_monthly, "JesusMaria_climate_clean23.csv", row.names = FALSE)
+write.csv(carbayllo_monthly, "Carabayllo_climate_clean23.csv", row.names = FALSE)
+write.csv(nana_monthly, "Lurigancho_Chosica_climate_clean23.csv", row.names = FALSE)
+write.csv(sanborja_monthly, "SanBorja_climate_clean23.csv", row.names = FALSE)
+write.csv(sanjuan_monthly, "SanJuandeLurigancho_climate_clean23.csv", row.names = FALSE)
+write.csv(sanmartin_monthly, "SanMartinDePorres_climate_clean23.csv", row.names = FALSE)
+write.csv(santaanita_monthly, "SantaAnita_climate_clean23.csv", row.names = FALSE)
+write.csv(villamaria_monthly, "VillaMariaDelTriunfo_climate_clean23.csv", row.names = FALSE)
+write.csv(vonhumboldt_monthly, "LaMolina_climate_clean23.csv", row.names = FALSE)
 
 
 
