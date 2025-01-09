@@ -34,7 +34,7 @@ ManCamp_data <- read.csv("01_Messy_Data/1manualcampo_combined.csv")
 ManNana_data <- read.csv("01_Messy_Data/1manualnana_combined.csv")
 
 # Incidence data
-raw_incidence <- read.csv("00_Raw_Data/Peru_2000_2022.csv")
+raw_incidence <- read.csv("00_Raw_Data/Dengue_2000_2023.csv")
 # Demographic data
 raw_demographics <- read.csv("00_Raw_Data/TranslatedGeoPeru-peru_distritos.csv")
 
@@ -74,9 +74,9 @@ colnames(vonhumboldt_data) <- c("ID", "Date", "Time", "Temperature_(C)", "Precip
                             "Wind_Speed_m/s")
 
 #Translate Headings for Incidence Data
-colnames(raw_incidence) <- c("Department", "Province", "District", "Local_ID",
-                             "Disease", "Year", "Week", "Diagnosis", "Diresa",
-                             "Ubigeo", "Local_Code", "Age", "Age_Type", "Sex")
+colnames(raw_incidence) <- c("Department", "Province", "District",
+                             "Disease", "Year", "Week", "Diagnosis", "Diagnosis_Type",
+                             "Tellfull", "Ubigeo",  "Age", "Age_Type", "Sex")
 head(raw_incidence)
 
 #Translate Headings for demographic Data
@@ -208,7 +208,7 @@ write.csv(district_pop, "PopulationDistricts.csv")
 
 # Incidence, Filter by province and Year
 Messy_incidence <- raw_incidence %>%
-  filter(Province == "LIMA" & Year >= 2019 & Year <= 2022)
+  filter(Province == "LIMA" & Year >= 2019 & Year <= 2023)
 
 ###############################################################################################################
 #Check for duplicates
@@ -240,7 +240,7 @@ Messy_incidence %>% distinct(Age_Type) #Check if there are any under 1's
 Messy_incidence$Age_Type
 
 # Remove from Incidence
-Messy_incidence <- Messy_incidence  %>% dplyr::select(-c(Local_Code, Local_ID, Diresa, Ubigeo))
+Messy_incidence <- Messy_incidence  %>% dplyr::select(-c(Tellfull, Ubigeo))
 
 # Remove from Demographics
 Messy_Demographics <- Messy_Demographics %>% dplyr::select(-c(
@@ -376,19 +376,23 @@ Messy_incidence_19 <- Messy_incidence %>%
   mutate(Date = as.Date(paste0(Year, "-01-05")) + 7 * (Week - 1))
 #For 2020
 Messy_incidence_20 <- Messy_incidence %>%
-  filter(Year %in% 2020) %>% # Filter rows for the years 2019 to 2022
+  filter(Year %in% 2020) %>% # Filter rows for the year 2020
   mutate(Date = as.Date(paste0(Year, "-01-04")) + 7 * (Week - 1))
 #For 2021
 Messy_incidence_21 <- Messy_incidence %>%
-  filter(Year %in% 2021) %>% # Filter rows for the years 2019 to 2022
+  filter(Year %in% 2021) %>% # Filter rows for the year 2021
   mutate(Date = as.Date(paste0(Year, "-01-09")) + 7 * (Week - 1))
 #For 2022
 Messy_incidence_22 <- Messy_incidence %>%
-  filter(Year %in% 2022) %>% # Filter rows for the years 2019 to 2022
+  filter(Year %in% 2022) %>% # Filter rows for the year 2022
+  mutate(Date = as.Date(paste0(Year, "-01-08")) + 7 * (Week - 1))
+#For 2023
+Messy_incidence_23 <- Messy_incidence %>%
+  filter(Year %in% 2023) %>% # Filter rows for the year 2023
   mutate(Date = as.Date(paste0(Year, "-01-08")) + 7 * (Week - 1))
 
 # I have each year broken into seperate tables above so they need to be merged back into a single table
-Incidence_List <- list(Messy_incidence_19, Messy_incidence_20, Messy_incidence_21, Messy_incidence_22)
+Incidence_List <- list(Messy_incidence_19, Messy_incidence_20, Messy_incidence_21, Messy_incidence_22, Messy_incidence_23)
 Merged_Messy_incidence <- Reduce(function(x, y) merge(x, y, all=TRUE), Incidence_List)
 
 #Remove the year and week column
@@ -398,11 +402,11 @@ Merged_Messy_incidence$Date <- as.Date(Merged_Messy_incidence$Date,
                                        format = "%Y-%m-%d", tz = "GMT-5")
 # Check data types
 str(Merged_Messy_incidence)
-#Updating the Disease column into binary Dengue Without Alarm Signs = 0, Dengue With Alarm Signs = 1
+# Updating the Disease column into Numerical Dengue Without Alarm Signs = 0, Dengue With Alarm Signs = 1
 Merged_Messy_incidence <- Merged_Messy_incidence %>%
   mutate(Disease = case_when(
-    Disease == "DENGUE SIN SEÑALES DE ALARMA" ~ "0",
-    Disease == "DENGUE CON SEÑALES DE ALARMA" ~ "1",
+    Disease == "DENGUE SIN SIGNOS DE ALARMA" ~ "0",
+    Disease == "DENGUE CON SIGNOS DE ALARMA" ~ "1",
     Disease == "DENGUE GRAVE" ~ "2",
     TRUE ~ Disease
   ))%>%
@@ -418,9 +422,19 @@ Merged_Messy_incidence <- Merged_Messy_incidence %>%
   )) %>%
   mutate_at(c("Sex"), as.numeric)
 
+# Create variables for Diagnostic Type Confirmed = 1, Probable = 2, Suspected = 3
+Merged_Messy_incidence <- Merged_Messy_incidence %>%
+  mutate(Diagnosis_Type = case_when(
+    Diagnosis_Type == "C" ~ "1",
+    Diagnosis_Type == "P" ~ "2",
+    Diagnosis_Type == "S" ~ "3",
+    TRUE ~ Diagnosis_Type
+  )) %>%
+  mutate_at(c("Diagnosis_Type"), as.numeric)
+
 setwd("~/LSHTM_23/Thesis/Lima_Dengue/01_Messy_Data")
 #Save Cleaned Data
-write.csv(Merged_Messy_incidence, file = "Individual_Incidence.csv")
+write.csv(Merged_Messy_incidence, file = "Individual_Incidence23.csv")
 ##################################################################################################################
 # Start to consolidate weather data by first finding the average of each data point per week and month.
 
@@ -771,5 +785,4 @@ write.csv(vonhumboldt_month_av, "von_humboldt_mothly.csv")
 
 # Move over to Finishing Weather Script to continue cleaning the weather datasets that I
 # just finished writing and saving into messy data up above. 
-
 

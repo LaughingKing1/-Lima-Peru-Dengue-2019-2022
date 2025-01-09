@@ -461,6 +461,8 @@ write.csv(santaanita_monthly, "SantaAnita_climate_clean23.csv", row.names = FALS
 write.csv(villamaria_monthly, "VillaMariaDelTriunfo_climate_clean23.csv", row.names = FALSE)
 write.csv(vonhumboldt_monthly, "LaMolina_climate_clean23.csv", row.names = FALSE)
 
+# Move to Replicating Weather District R-Code to finish up bringing all of the weather data together into a final dataframe for the master
+
 
 
 
